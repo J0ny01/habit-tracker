@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Habits Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .greeting {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .date {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .habits-list {
+            margin-bottom: 30px;
+        }
+
+        .habit-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #4facfe;
+            transition: all 0.3s ease;
+        }
+
+        .habit-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .habit-item.completed {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-left-color: #28a745;
+        }
+
+        .habit-text {
+            font-size: 16px;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+
+        .habit-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 3px solid #4facfe;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .habit-checkbox.checked {
+            background: #28a745;
+            border-color: #28a745;
+        }
+
+        .habit-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .progress-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .progress-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .settings-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .habits-manager {
+            margin-bottom: 20px;
+        }
+
+        .habit-input-group {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .habit-input-group input {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .add-habit-btn, .remove-habit-btn {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .add-habit-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .remove-habit-btn {
+            background: #dc3545;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .save-btn, .close-btn {
+            width: 48%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+            margin-right: 4%;
+        }
+
+        .close-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .save-btn:hover, .close-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .reset-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            color: #1976d2;
+            font-weight: 500;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            body {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="greeting" id="greeting">Olá!</div>
+            <div class="date" id="currentDate"></div>
+        </div>
+        
+        <div class="content">
+            <div class="progress-section">
+                <div class="progress-text" id="progressText">0 de 0 completas</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="habits-list" id="habitsList">
+                <!-- Habits will be dynamically loaded here -->
+            </div>
+            
+            <button class="settings-btn" onclick="openSettings()">⚙️ Configurações</button>
+            
+            <div class="reset-info">
+                <div>📅 A lista reseta todos os dias à meia-noite</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">Configurações</div>
+            
+            <div class="form-group">
+                <label class="form-label" for="userName">Como você gostaria de ser chamado?</label>
+                <input type="text" class="form-input" id="userName" placeholder="Digite seu nome">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="languageSelect">Idioma</label>
+                <select class="form-input" id="languageSelect" onchange="changeLanguagePreview()">
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="en">🇺🇸 English</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="habitsManager">Seus Hábitos Diários</label>
+                <div class="habits-manager" id="habitsManager">
+                    <!-- Dynamic habit inputs will be added here -->
+                </div>
+                <button class="add-habit-btn" onclick="addHabitInput()">+ Adicionar Hábito</button>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                <button class="save-btn" onclick="saveSettings()">Salvar</button>
+                <button class="close-btn" onclick="closeSettings()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            pt: {
+                hello: 'Olá',
+                settings: '⚙️ Configurações',
+                resetInfo: '📅 A lista reseta todos os dias à meia-noite',
+                settingsTitle: 'Configurações',
+                nameLabel: 'Como você gostaria de ser chamado?',
+                namePlaceholder: 'Digite seu nome',
+                habitsLabel: 'Seus Hábitos Diários',
+                addHabit: '+ Adicionar Hábito',
+                save: 'Salvar',
+                close: 'Fechar',
+                newHabit: 'Novo Hábito',
+                completed: 'completas',
+                of: 'de',
+                language: 'Idioma',
+                defaultHabits: ['Estudar Russo', 'Exercício físico', 'Aprender Algo']
+            },
+            en: {
+                hello: 'Hello',
+                settings: '⚙️ Settings',
+                resetInfo: '📅 The list resets every day at midnight',
+                settingsTitle: 'Settings',
+                nameLabel: 'What would you like to be called?',
+                namePlaceholder: 'Enter your name',
+                habitsLabel: 'Your Daily Habits',
+                addHabit: '+ Add Habit',
+                save: 'Save',
+                close: 'Close',
+                newHabit: 'New Habit',
+                completed: 'completed',
+                of: 'of',
+                language: 'Language',
+                defaultHabits: ['Study Russian', 'Physical Exercise', 'Learn Something']
+            },
+            es: {
+                hello: 'Hola',
+                settings: '⚙️ Configuración',
+                resetInfo: '📅 La lista se reinicia todos los días a medianoche',
+                settingsTitle: 'Configuración',
+                nameLabel: '¿Cómo te gustaría que te llamen?',
+                namePlaceholder: 'Ingresa tu nombre',
+                habitsLabel: 'Tus Hábitos Diarios',
+                addHabit: '+ Agregar Hábito',
+                save: 'Guardar',
+                close: 'Cerrar',
+                newHabit: 'Nuevo Hábito',
+                completed: 'completados',
+                of: 'de',
+                language: 'Idioma',
+                defaultHabits: ['Estudiar Ruso', 'Ejercicio Físico', 'Aprender Algo']
+            },
+            fr: {
+                hello: 'Salut',
+                settings: '⚙️ Paramètres',
+                resetInfo: '📅 La liste se remet à zéro tous les jours à minuit',
+                settingsTitle: 'Paramètres',
+                nameLabel: 'Comment aimeriez-vous être appelé?',
+                namePlaceholder: 'Entrez votre nom',
+                habitsLabel: 'Vos Habitudes Quotidiennes',
+                addHabit: '+ Ajouter Habitude',
+                save: 'Sauvegarder',
+                close: 'Fermer',
+                newHabit: 'Nouvelle Habitude',
+                completed: 'complétées',
+                of: 'sur',
+                language: 'Langue',
+                defaultHabits: ['Étudier le Russe', 'Exercice Physique', 'Apprendre Quelque Chose']
+            },
+            de: {
+                hello: 'Hallo',
+                settings: '⚙️ Einstellungen',
+                resetInfo: '📅 Die Liste wird jeden Tag um Mitternacht zurückgesetzt',
+                settingsTitle: 'Einstellungen',
+                nameLabel: 'Wie möchten Sie genannt werden?',
+                namePlaceholder: 'Geben Sie Ihren Namen ein',
+                habitsLabel: 'Ihre Täglichen Gewohnheiten',
+                addHabit: '+ Gewohnheit Hinzufügen',
+                save: 'Speichern',
+                close: 'Schließen',
+                newHabit: 'Neue Gewohnheit',
+                completed: 'abgeschlossen',
+                of: 'von',
+                language: 'Sprache',
+                defaultHabits: ['Russisch Lernen', 'Körperliche Übung', 'Etwas Lernen']
+            },
+            ru: {
+                hello: 'Привет',
+                settings: '⚙️ Настройки',
+                resetInfo: '📅 Список сбрасывается каждый день в полночь',
+                settingsTitle: 'Настройки',
+                nameLabel: 'Как бы вы хотели, чтобы вас называли?',
+                namePlaceholder: 'Введите ваше имя',
+                habitsLabel: 'Ваши Ежедневные Привычки',
+                addHabit: '+ Добавить Привычку',
+                save: 'Сохранить',
+                close: 'Закрыть',
+                newHabit: 'Новая Привычка',
+                completed: 'выполнено',
+                of: 'из',
+                language: 'Язык',
+                defaultHabits: ['Изучать Русский', 'Физические Упражнения', 'Изучать Что-то']
+            }
+        };
+
+        // App state
+        let appData = {
+            userName: 'Usuário',
+            language: 'pt',
+            habits: ['Estudar Russo', 'Exercício físico', 'Aprender Algo'],
+            completedHabits: [],
+            lastResetDate: null
+        };
+
+        // Get translated text
+        function t(key) {
+            return translations[appData.language][key] || translations['pt'][key] || key;
+        }
+
+        // Update all text elements with current language
+        function updateLanguage() {
+            document.querySelector('.settings-btn').innerHTML = t('settings');
+            document.querySelector('.reset-info div').textContent = t('resetInfo');
+            updateGreeting();
+            updateProgress();
+        }
+
+        // Load data from browser storage
+        function loadData() {
+            try {
+                const savedData = localStorage.getItem('habitTrackerData');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    appData = { ...appData, ...parsedData };
+                }
+            } catch (error) {
+                console.log('Error loading data:', error);
+            }
+            
+            const today = new Date().toDateString();
+            
+            // Check if we need to reset (new day)
+            if (appData.lastResetDate !== today) {
+                appData.completedHabits = [];
+                appData.lastResetDate = today;
+                saveData(); // Save the reset
+            }
+
+            // Set default habits based on language if none exist
+            if (!appData.habits || appData.habits.length === 0) {
+                appData.habits = [...t('defaultHabits')];
+                saveData();
+            }
+        }
+
+        // Save data to browser storage
+        function saveData() {
+            try {
+                localStorage.setItem('habitTrackerData', JSON.stringify(appData));
+                console.log('Data saved successfully');
+            } catch (error) {
+                console.log('Error saving data:', error);
+            }
+        }
+
+        // Initialize the app
+        function initApp() {
+            loadData();
+            updateLanguage();
+            updateGreeting();
+            updateDate();
+            renderHabits();
+            updateProgress();
+        }
+
+        // Update greeting with user name
+        function updateGreeting() {
+            document.getElementById('greeting').textContent = `${t('hello')}, ${appData.userName}!`;
+        }
+
+        // Update current date
+        function updateDate() {
+            const today = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = 
+                today.toLocaleDateString('pt-BR', options);
+        }
+
+        // Render habits list
+        function renderHabits() {
+            const habitsList = document.getElementById('habitsList');
+            habitsList.innerHTML = '';
+            
+            appData.habits.forEach((habit, index) => {
+                const isCompleted = appData.completedHabits.includes(index);
+                const habitElement = document.createElement('div');
+                habitElement.className = `habit-item ${isCompleted ? 'completed' : ''}`;
+                habitElement.innerHTML = `
+                    <div class="habit-text">${habit}</div>
+                    <div class="habit-checkbox ${isCompleted ? 'checked' : ''}" 
+                         onclick="toggleHabit(${index})"></div>
+                `;
+                habitsList.appendChild(habitElement);
+            });
+        }
+
+        // Toggle habit completion
+        function toggleHabit(index) {
+            const habitIndex = appData.completedHabits.indexOf(index);
+            if (habitIndex > -1) {
+                appData.completedHabits.splice(habitIndex, 1);
+            } else {
+                appData.completedHabits.push(index);
+            }
+            
+            saveData();
+            renderHabits();
+            updateProgress();
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const completed = appData.completedHabits.length;
+            const total = appData.habits.length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+            
+            document.getElementById('progressText').textContent = 
+                `${completed} ${t('of')} ${total} ${t('completed')}`;
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+        }
+
+        // Settings modal functions
+        function openSettings() {
+            document.getElementById('userName').value = appData.userName;
+            document.getElementById('languageSelect').value = appData.language;
+            renderHabitInputs();
+            updateSettingsModal();
+            document.getElementById('settingsModal').style.display = 'block';
+        }
+
+        function updateSettingsModal() {
+            document.querySelector('.modal-header').textContent = t('settingsTitle');
+            document.querySelector('label[for="userName"]').textContent = t('nameLabel');
+            document.getElementById('userName').placeholder = t('namePlaceholder');
+            document.querySelector('label[for="languageSelect"]').textContent = t('language');
+            document.querySelector('label[for="habitsManager"]').textContent = t('habitsLabel');
+            document.querySelector('.add-habit-btn').textContent = t('addHabit');
+            document.querySelector('.save-btn').textContent = t('save');
+            document.querySelector('.close-btn').textContent = t('close');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function renderHabitInputs() {
+            const habitsManager = document.getElementById('habitsManager');
+            habitsManager.innerHTML = '';
+            
+            appData.habits.forEach((habit, index) => {
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'habit-input-group';
+                inputGroup.innerHTML = `
+                    <input type="text" class="form-input" value="${habit}" 
+                           onchange="updateHabitText(${index}, this.value)">
+                    <button class="remove-habit-btn" onclick="removeHabit(${index})">🗑️</button>
+                `;
+                habitsManager.appendChild(inputGroup);
+            });
+        }
+
+        function addHabitInput() {
+            appData.habits.push(t('newHabit'));
+            renderHabitInputs();
+        }
+
+        function removeHabit(index) {
+            if (appData.habits.length > 1) {
+                appData.habits.splice(index, 1);
+                // Remove from completed habits if it was completed
+                const completedIndex = appData.completedHabits.indexOf(index);
+                if (completedIndex > -1) {
+                    appData.completedHabits.splice(completedIndex, 1);
+                }
+                // Adjust other completed habit indices
+                appData.completedHabits = appData.completedHabits.map(i => i > index ? i - 1 : i);
+                renderHabitInputs();
+            }
+        }
+
+        function updateHabitText(index, newText) {
+            if (newText.trim()) {
+                appData.habits[index] = newText.trim();
+            }
+        }
+
+        function saveSettings() {
+            const newUserName = document.getElementById('userName').value.trim();
+            if (newUserName) {
+                appData.userName = newUserName;
+            }
+
+            const newLanguage = document.getElementById('languageSelect').value;
+            if (newLanguage !== appData.language) {
+                appData.language = newLanguage;
+                updateLanguage();
+            }
+            
+            // Filter out empty habits
+            appData.habits = appData.habits.filter(habit => habit.trim() !== '');
+            if (appData.habits.length === 0) {
+                appData.habits = [t('newHabit')];
+            }
+            
+            saveData();
+            updateGreeting();
+            renderHabits();
+            updateProgress();
+            closeSettings();
+        }
+
+        // Language change preview (updates modal immediately)
+        function changeLanguagePreview() {
+            const tempLang = appData.language;
+            appData.language = document.getElementById('languageSelect').value;
+            updateSettingsModal();
+            appData.language = tempLang; // Don't save until user clicks save
+        }
+
+        // Check for daily reset every minute
+        setInterval(() => {
+            const today = new Date().toDateString();
+            if (appData.lastResetDate !== today) {
+                appData.completedHabits = [];
+                appData.lastResetDate = today;
+                saveData();
+                renderHabits();
+                updateProgress();
+                updateDate();
+            }
+        }, 60000);
+
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
